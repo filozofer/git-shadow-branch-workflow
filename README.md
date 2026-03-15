@@ -338,6 +338,17 @@ Expect small improvements as the workflow evolves.
 
 ---
 
+# Related tools
+
+- Graphite
+- ghstack
+- StGit
+
+These tools manage stacked changes.
+This project manages local shadow branches.
+
+---
+
 # License
 
 MIT
