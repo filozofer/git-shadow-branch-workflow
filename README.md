@@ -35,6 +35,12 @@ There are not just "noise" but usefull working memory which improve by far their
 Sometimes, however, teams can decide that your comments should not be present in the shared codebase because there are consider as "not usefull" and "will not be read by team members" and "will not be maintain while the code evolve".
 If for whatever reason, your are in a team which refuses to understand your way of thinking (yours needs) or prefer you to leave the company rather than tolerate your coding method, this project exists so you can **still keep your comments locally**.
 
+As a co-benefit usage, if you have commits which you only want to keep in your @local branch it's also possible using this shadow branch workflow.
+Example of usages : 
+- Remove some form validations rules inside your dev env only
+- Local env improvements which your team does not want to use
+- Scripts for your usage only
+
 ---
 
 # Concept
