@@ -100,6 +100,7 @@ Example configuration:
 WORKSPACE_DIR="../"
 PUBLIC_BASE_BRANCH="develop"
 LOCAL_SUFFIX="@local"
+LOCAL_COMMENT_PATTERN='^[[:space:]]*(///|##|---|;;|%%|<!---|/\*\*|\*)'
 
 ```
 
@@ -131,7 +132,7 @@ For each project:
 ./bin/install-hook.sh my-project
 ```
 
-The hook prevents accidental commits containing your local comment pattern (by default : `///`).
+The hook prevents accidental commits containing your local comment pattern (by default one extra comment marker, see LOCAL_COMMENT_PATTERN env var).
 
 ---
 
@@ -172,7 +173,7 @@ feature/login@local
 
 Write your code normally on your "@local" branch.
 
-Example (here see the triple "/" used for comments):
+Example (look at the triple "/" used for comments here):
 
 ```ts
   /// Get user from database
@@ -218,7 +219,7 @@ This:
 
 1. removes local comments from staged code
 2. commits your changes in two commits : one with your changes and one with your local comments
-3. cherry-picks the commits without comments from your @local branch to the public branch (every commit with a title which begin by [COMMENTS] or [LOCAL])
+3. cherry-picks the commits without comments from your @local branch to the public branch (every commit with a title which begin by [COMMENTS], [COMMENT] or [LOCAL])
 
 Push normally:
 
@@ -245,11 +246,11 @@ git finish-feature my-project
 This command:
 
 * updates your main branch (default : `develop`)
-* merges your main branch into his "@local" shallow branch (default: `develop@local`)
+* merges your main branch into his "@local" shadow branch (default: `develop@local`)
 * merges `feature@local` into `develop@local`
 * optionally deletes feature branches
 
-(every branch naming is configurable)
+(every branch naming is configurable inside your own .env file)
 
 ---
 
@@ -306,20 +307,20 @@ Main options:
 WORKSPACE_DIR="../"
 PUBLIC_BASE_BRANCH="develop"
 LOCAL_SUFFIX="@local"
-LOCAL_COMMENT_PATTERN='^[[:space:]]*///([[:space:]]|$)'
+LOCAL_COMMENT_PATTERN='^[[:space:]]*(///|##|---|;;|%%|<!---|/\*\*|\*)'
 ```
 
 ---
 
 # Drawbacks
 
-Everything you can do with this toolkit can also be done manually. This toolkit therefore provides a set of new commands simply to save you time when setting up a shallow local branch pattern. 
+Everything you can do with this toolkit can also be done manually. This toolkit therefore provides a set of new commands simply to save you time when setting up a shadow local branch pattern. 
 
 Although these commands allow you to use this pattern without any immediate loss of productivity, two major drawbacks should still be noted:
 
 - Your team members won’t benefit from your local commits, since that’s the whole point of this pattern. I would recommend using it only if your team refuses to tolerate your commits (with your comments for example) on the shared repository
 
--  To maintain your main shallow branch (e.g., `develop@local`), you’ll have to manage Git conflicts whenever other team members update code segments on which you have local comments. Although these conflicts are generally easy and quick to resolve, they represent a definite drawback compared to simply being able to share all comments with your team
+-  To maintain your main shadow branch (example: `develop@local`), you’ll have to manage Git conflicts whenever other team members update code segments on which you have local comments. Although these conflicts are generally easy and quick to resolve, they represent a definite drawback compared to simply being able to share all comments with your team
 
 ---
 
