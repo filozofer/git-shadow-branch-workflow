@@ -65,6 +65,12 @@ resolve_workspace_dir() {
 # Resolve project relative path to absolute
 resolve_project_path() {
   local project_arg="$1"
+
+  if [[ -z "$project_arg" || "$project_arg" = "." ]]; then
+    printf '%s\n' "$PWD"
+    return
+  fi
+
   local workspace
   workspace="$(resolve_workspace_dir)"
 

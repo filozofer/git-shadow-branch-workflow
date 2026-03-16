@@ -13,7 +13,9 @@ This toolkit provides a small set of commands and hooks that create a **shadow b
 * **Public branches** → clean code shared with the team
 * **Local shadow branches (`@local`)** → personal design comments, navigation markers, local dev env improvements...
 
-The result: you can keep your code comments and local features when your team does not want them !
+The result: 
+Write the comments, structure and tools you need to think.
+Publish only the code your team needs to read.
 
 ---
 
@@ -57,7 +59,7 @@ Your development happens in the `@local` branch.
 When you finish working and want to commit your work you can call the git publish command :
 
 ```
-git shadow publish my-project
+git shadow publish
 ```
 
 The toolkit:
@@ -72,34 +74,19 @@ The toolkit:
 
 ## 1 Clone the toolkit
 
-Place it inside your workspace directory (next to your projects).
-
-Example structure:
-
-```
-workspace/
-├─ git-local-comments-workflow
-├─ project-a
-├─ project-b
-```
-
-Clone:
-
 ```bash
 git clone https://github.com/filozofer/git-local-comments-workflow.git
 ```
 
 ---
 
-## 2 Configure environment
-
-Copy the configuration file:
+## 2 Configure environment if you want to
 
 ```bash
 cp .env.example .env
 ```
 
-You can leave all the default values or rather adapt to your needs.
+You can adapt to your needs.
 Example configuration:
 
 ```
@@ -112,18 +99,18 @@ LOCAL_COMMENT_PATTERN='^[[:space:]]*(///|##|---|;;|%%|<!---|/\*\*|\*)'
 
 ---
 
-## 3 Make `git-shadow` available
+## 3 Make `git shadow` available
 
 Option 1 (recommended): add the toolkit `bin` folder to your PATH, then use the wrapper directly:
 
 ```bash
 export PATH="$PWD/bin:$PATH"
 # now you can run:
-# git-shadow commit my-project -m "message"
-# git-shadow publish my-project
+# git shadow commit -m "message"
+# git shadow publish
 ```
 
-Option 2: create a Git alias to run the wrapper as `git shadow`:
+Option 2: create a Git alias :
 
 ```bash
 git config --global alias.shadow "!sh /chemin/vers/git-shadow/bin/git-shadow"
@@ -133,10 +120,8 @@ git config --global alias.shadow "!sh /chemin/vers/git-shadow/bin/git-shadow"
 
 ## 4 Install the pre-commit hook
 
-For each project:
-
 ```bash
-git shadow install-hook my-project
+git shadow install-hook
 ```
 
 The hook prevents accidental commits containing your local comment pattern (by default one extra comment marker, see LOCAL_COMMENT_PATTERN env var).
@@ -144,14 +129,18 @@ The hook will not provoke error on other team members environments if they haven
 
 ---
 
-# Commands
 
-All commands receive the **project directory** as their first argument.
+## Doctor
 
-Example : 
+`git shadow doctor` checks the toolkit installation and current project repository status.
+
+- checks essential toolkit scripts and configuration.
+- checks git availability.
+- checks `git shadow` command presence.
+- checks current repo status (clean/staged, current branch).
 
 ```bash
-git shadow publish my-project
+git shadow doctor
 ```
 
 ---
@@ -159,7 +148,7 @@ git shadow publish my-project
 # Create a feature
 
 ```bash
-git shadow new-feature my-project feature/login
+git shadow new-feature feature/login
 ```
 
 Creates:
@@ -220,19 +209,19 @@ Example (look at the triple "/" used for comments here):
 
 ```bash
 git add .
-git shadow commit my-project -m "feat(auth): user login function"
-git shadow publish my-project
+git shadow commit -m "feat(auth): user login function"
+git shadow publish
 
 # OR 
 git add .
-git shadow publish my-project --commit -m "feat(auth): user login function"
+git shadow publish --commit -m "feat(auth): user login function"
 ```
 
 This:
 
 1. removes local comments from staged code
 2. commits your changes in two commits : one with your changes and one with your local comments
-3. cherry-picks the commits without comments from your @local branch to the public branch (every commit with a title which begin by [COMMENTS], [COMMENT] or [LOCAL])
+3. cherry-picks the commits without comments from your @local branch to the public branch (every commit with a title which begin by [COMMENTS], [COMMENT] or [LOCAL] are not cherry-picked)
 
 Push normally:
 
@@ -240,7 +229,7 @@ Push normally:
 git push origin feature/login
 ```
 
-If you have commits which you only want to keep in your @local branch your can prefix them with "[LOCAL]" inside theirs titles.
+If you have commits which you only want to keep in your shadow branch your can prefix them with "[LOCAL]" inside theirs titles.
 Example of usages : 
 - Remove some form validations rules inside your dev env only
 - Local env improvements which your team does not want to use
@@ -253,7 +242,7 @@ Example of usages :
 After the MR is merged :
 
 ```bash
-git shadow finish-feature my-project
+git shadow finish-feature
 ```
 
 This command:
@@ -288,7 +277,7 @@ Your develop@local branches keep design comments and local features permanently.
 Create feature:
 
 ```bash
-git shadow new-feature my-project feature/user-login
+git shadow new-feature feature/user-login
 ```
 
 Work normally on your @local branch
@@ -296,31 +285,14 @@ Work normally on your @local branch
 Publish:
 
 ```bash
-git shadow publish my-project --commit -m "feat(auth): user login function"
+git shadow publish --commit -m "feat(auth): user login function"
 git push
 ```
 
 Finish after your branch has been merge on the main branch :
 
 ```bash
-git shadow finish-feature my-project
-```
-
----
-
-# Configuration
-
-The toolkit uses environment variables.
-
-See `.env.example`.
-
-Main options:
-
-```
-WORKSPACE_DIR="../"
-PUBLIC_BASE_BRANCH="develop"
-LOCAL_SUFFIX="@local"
-LOCAL_COMMENT_PATTERN='^[[:space:]]*(///|##|---|;;|%%|<!---|/\*\*|\*)'
+git shadow finish-feature
 ```
 
 ---

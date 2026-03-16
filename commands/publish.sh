@@ -9,14 +9,8 @@ set -euo pipefail
 # shellcheck disable=SC1091
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../lib" && pwd)/common.sh"
 
-# Validate arguments
-if [[ $# -lt 1 ]]; then
-  echo "Usage: git publish <project-dir> [--commit] [-m \"MESSAGE\"]" >&2
-  exit 1
-fi
-
-PROJECT_ARG="$1"
-shift
+# Publish operates on current repo only.
+PROJECT_ARG='.'
 COMMIT_FIRST=0
 COMMIT_MESSAGE=""
 
@@ -44,7 +38,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Enter project and validate current branch
-enter_project "$PROJECT_ARG"
+enter_project "."
 CURRENT_BRANCH="$(current_branch)"
 if [[ -z "$CURRENT_BRANCH" ]]; then
   echo "❌ Unable to determine current branch." >&2

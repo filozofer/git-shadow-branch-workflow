@@ -9,28 +9,29 @@ set -euo pipefail
 # shellcheck disable=SC1091
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../lib" && pwd)/common.sh"
 
-# Validate input args
-if [[ $# -lt 1 ]]; then
-  echo "Usage: $0 <project-dir> [-m \"message\"]" >&2
-  exit 1
-fi
-PROJECT_ARG="$1"
-shift
+# Commit in current repository (no project path argument supported)
 COMMIT_MESSAGE=""
 
-# Next step: parse optional `-m` commit message
+# Parse optional `-m` commit message
 while getopts "m:" opt; do
   case $opt in
     m) COMMIT_MESSAGE="$OPTARG" ;;
     *)
-      echo "Usage: $0 <project-dir> [-m \"message\"]" >&2
+      echo "Usage: $0 [-m \"message\"]" >&2
       exit 1
       ;;
   esac
 done
 
-# Enter project directory
-enter_project "$PROJECT_ARG"
+shift $((OPTIND -1))
+if [[ $# -gt 0 ]]; then
+  echo "❌ Unknown argument(s): $*" >&2
+  echo "Usage: $0 [-m \"message\"]" >&2
+  exit 1
+fi
+
+# Enter current project directory
+enter_project "."
 
 # Verify there is something to commit
 if git diff --cached --quiet; then

@@ -11,13 +11,8 @@ TOOLKIT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck disable=SC1091
 source "$TOOLKIT_ROOT/lib/common.sh"
 
-# Validate arguments and open target project repository
-if [[ $# -lt 1 ]]; then
-  echo "Usage: $0 <project-dir>" >&2
-  exit 1
-fi
-PROJECT_ARG="$1"
-enter_project "$PROJECT_ARG"
+# Install hook in current repository only
+enter_project "."
 
 # Choose hook location and ensure parent directory exists
 hook_file="$(detect_hook_file pre-commit)"

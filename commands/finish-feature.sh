@@ -9,13 +9,8 @@ set -euo pipefail
 # shellcheck disable=SC1091
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../lib" && pwd)/common.sh"
 
-# Validate required arguments
-if [[ $# -lt 1 ]]; then
-  echo "Usage: git finish-feature <project-dir> [--keep-branches] [--no-pull] [--force]" >&2
-  exit 1
-fi
-PROJECT_ARG="$1"
-shift
+# Finish-feature operates on current repository only.
+PROJECT_ARG='.'
 DELETE_BRANCHES=1
 PULL_BASES=1
 FORCE_DELETE=0

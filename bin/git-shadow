@@ -16,6 +16,9 @@ case "$COMMAND" in
   commit)
     "$TOOL_ROOT/commands/commit.sh" "$@"
     ;;
+  doctor)
+    "$TOOL_ROOT/commands/doctor.sh" "$@"
+    ;;
   publish)
     "$TOOL_ROOT/commands/publish.sh" "$@"
     ;;
@@ -31,17 +34,18 @@ git-shadow
 Shadow branch workflow utilities.
 
 Commands:
-  new-feature <project> <branch>
-  commit <project> [-m "message"]
-  publish <project> [--commit -m MESSAGE]
-  finish-feature <project>
-  install-hook <project>
+  install-hook
+  doctor
+  new-feature <branch>
+  commit [-m "message"]
+  publish [--commit] [-m MESSAGE]
+  finish-feature
 
 Examples:
-  git shadow new-feature my-project feat/login
-  git shadow commit my-project -m "feat(auth): login route"
-  git shadow publish my-project --commit -m "feat: login"
-  git shadow finish-feature my-project
+  git shadow new-feature feature/login
+  git shadow commit -m "feat(auth): login route"
+  git shadow publish --commit -m "feat: login"
+  git shadow finish-feature
 EOF
     ;;
   *)
