@@ -30,18 +30,21 @@ if [[ -z "$CURRENT_BRANCH" ]]; then
 fi
 PUBLIC_BASE="$(public_branch_from_any "$CURRENT_BRANCH")"
 LOCAL_BASE="$(local_branch_from_any "$CURRENT_BRANCH")"
-echo "Public base: $PUBLIC_BASE"
-echo "Local base : $LOCAL_BASE"
 
-# Ensure the public and local base branches exist before creating feature branches
+# Ensure the public base branch exists before creating feature branches
 if ! git show-ref --verify --quiet "refs/heads/$PUBLIC_BASE"; then
   echo "❌ Public base branch does not exist: $PUBLIC_BASE" >&2
   exit 1
 fi
+
+# If the local base branch does not exist, fall back to the public base
 if ! git show-ref --verify --quiet "refs/heads/$LOCAL_BASE"; then
-  echo "❌ Local base branch does not exist: $LOCAL_BASE" >&2
-  exit 1
+  echo "ℹ️ Local base branch '$LOCAL_BASE' not found, using '$PUBLIC_BASE' as local base."
+  LOCAL_BASE="$PUBLIC_BASE"
 fi
+
+echo "Public base: $PUBLIC_BASE"
+echo "Local base : $LOCAL_BASE"
 if git show-ref --verify --quiet "refs/heads/$FEATURE_NAME"; then
   echo "❌ Branch already exists: $FEATURE_NAME" >&2
   exit 1

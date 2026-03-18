@@ -47,3 +47,11 @@ teardown() {
   run git shadow feature start test-feature
   [ "$status" -eq 1 ]
 }
+
+@test "feature start uses public base when local base branch does not exist" {
+  git branch -d "develop@local"
+  run git shadow feature start test-feature
+  [ "$status" -eq 0 ]
+  git show-ref --verify --quiet "refs/heads/test-feature"
+  git show-ref --verify --quiet "refs/heads/test-feature@local"
+}
