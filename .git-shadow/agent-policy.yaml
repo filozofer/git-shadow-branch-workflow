@@ -1,0 +1,50 @@
+version: 1
+tool: git-shadow
+principle: "code for thinking != code for collaboration"
+branches:
+  shadow_suffix: "@local"
+  default_workspace: shadow
+  shadow_description: "thinking workspace for exploration, reasoning, debug code, and local-only comments"
+  public_description: "clean branch intended for review, collaboration, and sharing"
+comment_markers:
+  local_only:
+    - "///"
+    - "// @local"
+local_only_patterns:
+  comments:
+    - "///"
+    - "// @local"
+  code_patterns:
+    - "console.log("
+    - "debugger"
+  note_patterns:
+    - "TODO(local)"
+    - "FIXME(local)"
+behavior:
+  prefer_shadow_branch: true
+  preserve_reasoning_in_shadow: true
+  allow_pseudocode_in_shadow: true
+  allow_debug_code_in_shadow: true
+  avoid_premature_cleanup_in_shadow: true
+  require_clean_publish: true
+  strip_local_artifacts_on_publish: true
+decision_rules:
+  - when: "change supports reasoning, planning, or exploration"
+    action: "keep in shadow branch"
+  - when: "change is production-ready and intended for collaboration"
+    action: "publish to public branch"
+agent_guidance:
+  summary:
+    - "Work in @local by default"
+    - "Think explicitly when needed"
+    - "Keep reasoning visible in shadow branch"
+    - "Publish only clean code"
+  short_rule: "Use @local to think. Use publish to share."
+compatibility:
+  human_readable: true
+  machine_readable: true
+  intended_consumers:
+    - "AI coding agents"
+    - "local CLI agents"
+    - "repository automation"
+    - "human contributors"
