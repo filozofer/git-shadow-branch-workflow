@@ -16,9 +16,6 @@ if [[ $# -ne 1 ]]; then
 fi
 PROJECT_ARG='.'
 FEATURE_NAME="$1"
-  echo "Usage: git new-feature [<project-dir>] <branch-name>" >&2
-  exit 1
-fi
 LOCAL_BRANCH="${FEATURE_NAME}${LOCAL_SUFFIX}"
 
 # Enter project and ensure repo is in clean state

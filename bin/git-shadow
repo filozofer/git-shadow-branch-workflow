@@ -31,7 +31,7 @@ case "$COMMAND" in
     cat <<EOF
 git-shadow
 
-Shadow branch workflow utilities.
+Shadow branch pattern utilities.
 
 Commands:
   install-hook

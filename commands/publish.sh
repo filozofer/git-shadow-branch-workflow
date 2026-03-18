@@ -85,8 +85,8 @@ while IFS= read -r line; do
   fi
 
   # Skip commits that appear to contain local comments based on commit message convention
-  if [[ "$subject" =~ ^\[(COMMENTS?|LOCAL)\] ]]; then
-    echo "⏭️  Ignored (local comments): $sha  $subject"
+  if [[ "$subject" =~ ^\[(MEMORY|COMMENTS)\] ]]; then
+    echo "⏭️  Ignored (shadow memory/comments): $sha  $subject"
     continue
   fi
 

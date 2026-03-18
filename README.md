@@ -232,7 +232,7 @@ This:
 
 1. removes local comments from staged code
 2. commits your changes in two commits : one with your changes and one with your local comments
-3. cherry-picks the commits without comments from your @local branch to the public branch (every commit with a title which begin by [COMMENTS], [COMMENT] or [LOCAL] are not cherry-picked)
+3. cherry-picks the commits without comments from your @local branch to the public branch (every commit with a title which begin by [MEMORY] are not cherry-picked)
 
 Push normally:
 
@@ -240,7 +240,7 @@ Push normally:
 git push origin feature/login
 ```
 
-If you have commits which you only want to keep in your shadow branch your can prefix them with "[LOCAL]" inside theirs titles.
+If you have commits which you only want to keep in your shadow branch your can prefix them with "[MEMORY]" inside theirs titles.
 Example of usages : 
 - Remove some form validations rules inside your dev env only
 - Local env improvements which your team does not want to use
@@ -350,6 +350,29 @@ Git Shadow implements a workflow called the **Shadow Branch Pattern**.
 - **Not always necessary** : Everything Git Shadow does can be achieved manually with Git. Its value lies in automation, consistency, and reduced cognitive load. For simple workflows or small projects, the pattern may be unnecessary.
 
 Like any abstraction, Git Shadow is most valuable when the benefits of separating thinking from collaboration outweigh the additional workflow complexity.
+
+---
+
+# Testing
+
+Git Shadow includes a test suite using [Bats](https://github.com/bats-core/bats-core) (Bash Automated Testing System).
+
+To run the tests:
+
+1. Install Bats:
+   - On macOS: `brew install bats-core`
+   - On Ubuntu: `sudo apt-get install bats`
+   - On Windows: Use WSL or install via npm: `npm install -g bats`
+
+2. Run the tests:
+   ```bash
+   cd tests
+   ./run-tests.sh
+   ```
+
+The test suite includes:
+- Individual tests for each subcommand (`new-feature.bats`, `publish.bats`, etc.)
+- A comprehensive workflow test (`workflow.bats`) that validates the complete feature development cycle
 
 ---
 
