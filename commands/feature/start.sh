@@ -2,16 +2,16 @@
 set -euo pipefail
 
 # -------------------------------------------------------------------
-# Script: git-new-feature.sh
+# Script: feature/start.sh
 # Purpose: create a feature branch and corresponding @local shadow branch.
 # -------------------------------------------------------------------
 
 # shellcheck disable=SC1091
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../lib" && pwd)/common.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../../lib" && pwd)/common.sh"
 
 # Validate required parameters
 if [[ $# -ne 1 ]]; then
-  echo "Usage: git new-feature <branch-name>" >&2
+  echo "Usage: git shadow feature start <branch-name>" >&2
   exit 1
 fi
 PROJECT_ARG='.'

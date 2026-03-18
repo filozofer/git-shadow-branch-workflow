@@ -181,9 +181,9 @@ The CLI tool **git-shadow** implements this workflow and automates the operation
 Example usage:
 
 ```
-git shadow new-feature feature/login
-git shadow publish --commit -m "feat(login): add login flow"
-git shadow finish-feature
+git shadow feature start feature/login
+git shadow feature publish --commit -m "feat(login): add login flow"
+git shadow feature finish
 ```
 
 The tool handles:

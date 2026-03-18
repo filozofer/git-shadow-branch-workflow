@@ -2,12 +2,12 @@
 set -euo pipefail
 
 # -------------------------------------------------------------------
-# Script: git-publish.sh
+# Script: feature/publish.sh
 # Purpose: push clean commits from local shadow branch to public branch.
 # -------------------------------------------------------------------
 
 # shellcheck disable=SC1091
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../lib" && pwd)/common.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../../lib" && pwd)/common.sh"
 
 # Publish operates on current repo only.
 PROJECT_ARG='.'
@@ -31,7 +31,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     *)
       echo "❌ Unknown argument: $1" >&2
-      echo "Usage: git publish <project-dir> [--commit] [-m \"MESSAGE\"]" >&2
+      echo "Usage: git shadow feature publish [--commit] [-m \"MESSAGE\"]" >&2
       exit 1
       ;;
   esac

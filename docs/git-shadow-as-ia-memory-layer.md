@@ -186,7 +186,7 @@ All of this can live safely inside the project.
 And when it's time to publish:
 
 ```bash
-git shadow publish
+git shadow feature publish
 ```
 
 Only the clean code reaches the public branch.

@@ -84,7 +84,7 @@ Published code must be:
 5. Preferred workflow
 
 ```bash
-git shadow new-feature <branch-name>
+git shadow feature start <branch-name>
 # THEN WORK
 # Clean code as explain in "4. Publish only clean code"
 git shadow commit

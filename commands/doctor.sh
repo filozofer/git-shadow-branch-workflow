@@ -18,7 +18,7 @@ if [[ ! -d "$TOOLKIT_ROOT" ]]; then
   exit 1
 fi
 
-needed=("commands/new-feature.sh" "commands/commit.sh" "commands/publish.sh" "commands/finish-feature.sh" "commands/install-hook.sh" "scripts/check-local-comments.sh" "scripts/strip-local-comments.sh")
+needed=("commands/feature/start.sh" "commands/feature/publish.sh" "commands/feature/finish.sh" "commands/commit.sh" "commands/install-hook.sh" "scripts/check-local-comments.sh" "scripts/strip-local-comments.sh")
 for path in "${needed[@]}"; do
   if [[ ! -f "$TOOLKIT_ROOT/$path" ]]; then
     echo "❌ Missing required file: $path" >&2

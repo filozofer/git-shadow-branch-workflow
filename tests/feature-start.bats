@@ -18,32 +18,32 @@ teardown() {
   rm -rf "$TEST_DIR"
 }
 
-@test "new-feature exits 1 when no argument given" {
-  run git shadow new-feature
+@test "feature start exits 1 when no argument given" {
+  run git shadow feature start
   [ "$status" -eq 1 ]
 }
 
-@test "new-feature creates the public feature branch" {
-  run git shadow new-feature test-feature
+@test "feature start creates the public feature branch" {
+  run git shadow feature start test-feature
   [ "$status" -eq 0 ]
   git show-ref --verify --quiet "refs/heads/test-feature"
 }
 
-@test "new-feature creates the local shadow branch" {
-  run git shadow new-feature test-feature
+@test "feature start creates the local shadow branch" {
+  run git shadow feature start test-feature
   [ "$status" -eq 0 ]
   git show-ref --verify --quiet "refs/heads/test-feature@local"
 }
 
-@test "new-feature switches to the local shadow branch" {
-  run git shadow new-feature test-feature
+@test "feature start switches to the local shadow branch" {
+  run git shadow feature start test-feature
   [ "$status" -eq 0 ]
   current="$(git branch --show-current)"
   [ "$current" = "test-feature@local" ]
 }
 
-@test "new-feature exits 1 when branch name already exists" {
-  git shadow new-feature test-feature
-  run git shadow new-feature test-feature
+@test "feature start exits 1 when branch name already exists" {
+  git shadow feature start test-feature
+  run git shadow feature start test-feature
   [ "$status" -eq 1 ]
 }

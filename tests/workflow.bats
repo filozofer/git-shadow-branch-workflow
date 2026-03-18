@@ -18,9 +18,9 @@ teardown() {
   rm -rf "$TEST_DIR"
 }
 
-@test "complete workflow: new-feature -> commit -> publish -> finish-feature" {
+@test "complete workflow: feature start -> commit -> feature publish -> feature finish" {
   # 1. Create feature branches
-  run git shadow new-feature workflow-feature
+  run git shadow feature start workflow-feature
   [ "$status" -eq 0 ]
   # We are now on workflow-feature@local
 
@@ -31,7 +31,7 @@ teardown() {
   [ "$status" -eq 0 ]
 
   # 3. Publish: cherry-picks code commit to workflow-feature (switches us there)
-  run git shadow publish
+  run git shadow feature publish
   [ "$status" -eq 0 ]
 
   # 4. Verify public branch has the code commit
@@ -45,7 +45,7 @@ teardown() {
 
   # 6. Finish feature
   git checkout -q "workflow-feature@local"
-  run git shadow finish-feature --no-pull
+  run git shadow feature finish --no-pull
   [ "$status" -eq 0 ]
 
   # 7. Feature branches are deleted
@@ -61,7 +61,7 @@ teardown() {
 }
 
 @test "MEMORY commits are not published to public branch" {
-  git shadow new-feature memory-feature
+  git shadow feature start memory-feature
   # Add a MEMORY commit (prefix [MEMORY] to skip publish)
   echo "memory content" > memory.md
   git add memory.md
@@ -71,7 +71,7 @@ teardown() {
   git add code.txt
   git shadow commit -m "feat: code"
 
-  run git shadow publish
+  run git shadow feature publish
   [ "$status" -eq 0 ]
 
   git checkout -q memory-feature

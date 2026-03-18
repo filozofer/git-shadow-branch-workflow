@@ -5,29 +5,31 @@ TOOL_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 COMMAND="${1:-}"
 shift || true
 
-# Main command dispatcher
+# --- Two-level dispatch: git shadow <group> <subcommand> ---
+# If commands/<COMMAND>/ is a directory, treat the next arg as a subcommand.
+if [[ -n "$COMMAND" && -d "$TOOL_ROOT/commands/$COMMAND" ]]; then
+  SUBCOMMAND="${1:-}"
+  if [[ -z "$SUBCOMMAND" ]]; then
+    echo "❌ Missing subcommand for '$COMMAND'. Try: git shadow $COMMAND <subcommand>" >&2
+    exit 1
+  fi
+  script="$TOOL_ROOT/commands/$COMMAND/$SUBCOMMAND.sh"
+  if [[ -f "$script" ]]; then
+    shift
+    exec "$script" "$@"
+  fi
+  echo "❌ Unknown subcommand '$SUBCOMMAND' for '$COMMAND'." >&2
+  echo "   Run 'git shadow help' for usage." >&2
+  exit 1
+fi
+
+# --- One-level dispatch: git shadow <command> ---
+if [[ -n "$COMMAND" && -f "$TOOL_ROOT/commands/$COMMAND.sh" ]]; then
+  exec "$TOOL_ROOT/commands/$COMMAND.sh" "$@"
+fi
+
 case "$COMMAND" in
-  new-feature)
-    "$TOOL_ROOT/commands/new-feature.sh" "$@"
-    ;;
-  check-local-comments)
-    "$TOOL_ROOT/commands/check-local-comments.sh" "$@"
-    ;;
-  commit)
-    "$TOOL_ROOT/commands/commit.sh" "$@"
-    ;;
-  doctor)
-    "$TOOL_ROOT/commands/doctor.sh" "$@"
-    ;;
-  publish)
-    "$TOOL_ROOT/commands/publish.sh" "$@"
-    ;;
-  finish-feature)
-    "$TOOL_ROOT/commands/finish-feature.sh" "$@"
-    ;;
-  install-hook)
-    "$TOOL_ROOT/commands/install-hook.sh" "$@"
-    ;;  help|-h|--help|"")
+  help|-h|--help|"")
     cat <<EOF
 git-shadow
 
@@ -36,20 +38,22 @@ Shadow branch pattern utilities.
 Commands:
   install-hook
   doctor
-  new-feature <branch>
+  feature start <branch>
+  feature publish [--commit] [-m MESSAGE]
+  feature finish [--keep-branches] [--no-pull] [--force]
   commit [-m "message"]
-  publish [--commit] [-m MESSAGE]
-  finish-feature
+  check-local-comments
 
 Examples:
-  git shadow new-feature feature/login
+  git shadow feature start feature/login
   git shadow commit -m "feat(auth): login route"
-  git shadow publish --commit -m "feat: login"
-  git shadow finish-feature
+  git shadow feature publish --commit -m "feat: login"
+  git shadow feature finish
 EOF
     ;;
   *)
-    echo "Unknown command: $COMMAND"
+    echo "❌ Unknown command: $COMMAND" >&2
+    echo "   Run 'git shadow help' for usage." >&2
     exit 1
     ;;
 esac

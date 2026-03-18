@@ -67,10 +67,10 @@ feature/login         ← collaboration layer push to the remote repository
 
 Your development happens in the `@local` branch.
 
-When you finish working and want to commit your work you can call the git publish command :
+When you finish working and want to commit your work you can call the feature publish command :
 
 ```
-git shadow publish
+git shadow feature publish
 ```
 
 The toolkit:
@@ -118,7 +118,7 @@ Option 1 (recommended): add the toolkit `bin` folder to your PATH, then use the 
 export PATH="$PWD/bin:$PATH"
 # now you can run:
 # git shadow commit -m "message"
-# git shadow publish
+# git shadow feature publish
 ```
 
 Option 2: create a Git alias :
@@ -159,7 +159,7 @@ git shadow doctor
 # Create a feature
 
 ```bash
-git shadow new-feature feature/login
+git shadow feature start feature/login
 ```
 
 Creates:
@@ -221,11 +221,11 @@ Example (look at the triple "/" used for comments here):
 ```bash
 git add .
 git shadow commit -m "feat(auth): user login function"
-git shadow publish
+git shadow feature publish
 
-# OR 
+# OR
 git add .
-git shadow publish --commit -m "feat(auth): user login function"
+git shadow feature publish --commit -m "feat(auth): user login function"
 ```
 
 This:
@@ -254,7 +254,7 @@ Example of usages :
 After the MR is merged :
 
 ```bash
-git shadow finish-feature
+git shadow feature finish
 ```
 
 This command:
@@ -289,7 +289,7 @@ Your develop@local branches keep design comments and local features permanently.
 Create feature:
 
 ```bash
-git shadow new-feature feature/user-login
+git shadow feature start feature/user-login
 ```
 
 Work normally on your @local branch
@@ -297,14 +297,14 @@ Work normally on your @local branch
 Publish:
 
 ```bash
-git shadow publish --commit -m "feat(auth): user login function"
+git shadow feature publish --commit -m "feat(auth): user login function"
 git push
 ```
 
 Finish after your branch has been merge on the main branch :
 
 ```bash
-git shadow finish-feature
+git shadow feature finish
 ```
 
 ---
@@ -371,7 +371,7 @@ To run the tests:
    ```
 
 The test suite includes:
-- Individual tests for each subcommand (`new-feature.bats`, `publish.bats`, etc.)
+- Individual tests for each subcommand (`feature-start.bats`, `feature-publish.bats`, `feature-finish.bats`, etc.)
 - A comprehensive workflow test (`workflow.bats`) that validates the complete feature development cycle
 
 ---

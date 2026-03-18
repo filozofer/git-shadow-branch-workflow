@@ -2,12 +2,12 @@
 set -euo pipefail
 
 # -------------------------------------------------------------------
-# Script: git-finish-feature.sh
+# Script: feature/finish.sh
 # Purpose: finalize work on a feature by syncing and cleaning branches.
 # -------------------------------------------------------------------
 
 # shellcheck disable=SC1091
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../lib" && pwd)/common.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../../lib" && pwd)/common.sh"
 
 # Finish-feature operates on current repository only.
 PROJECT_ARG='.'
@@ -32,7 +32,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     *)
       echo "❌ Unknown argument: $1" >&2
-      echo "Usage: git finish-feature <project-dir> [--keep-branches] [--no-pull] [--force]" >&2
+      echo "Usage: git shadow feature finish [--keep-branches] [--no-pull] [--force]" >&2
       exit 1
       ;;
   esac
