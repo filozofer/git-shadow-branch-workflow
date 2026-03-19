@@ -2,7 +2,7 @@ class GitShadow < Formula
   desc "Shadow branch pattern utilities for Git"
   homepage "https://github.com/filozofer/git-shadow"
   url "https://github.com/filozofer/git-shadow/releases/download/v1.0.0/git-shadow-1.0.0.tar.gz"
-  sha256 "PLACEHOLDER"
+  sha256 "13fb16b21506db675ddf7f220475fe7226e811a37d1286d5d5cbb0e5e4b6980b"
   version "1.0.0"
   license "MIT"
 
