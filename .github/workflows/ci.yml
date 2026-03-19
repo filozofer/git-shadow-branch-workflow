@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Bats test suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install bats-core
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y bats
+
+      - name: Make scripts executable
+        run: |
+          chmod +x bin/git-shadow
+          find commands lib scripts -name "*.sh" -exec chmod +x {} \;
+
+      - name: Add git-shadow to PATH
+        run: echo "$PWD/bin" >> "$GITHUB_PATH"
+
+      - name: Configure git identity (required by some tests)
+        run: |
+          git config --global user.name "CI"
+          git config --global user.email "ci@example.com"
+
+      - name: Run tests
+        run: bats tests/*.bats
