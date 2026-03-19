@@ -1,7 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-TOOL_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Resolve TOOL_ROOT correctly even when this script is invoked via a symlink.
+_gs_script="${BASH_SOURCE[0]}"
+while [[ -L "$_gs_script" ]]; do
+  _gs_dir="$(cd "$(dirname "$_gs_script")" && pwd)"
+  _gs_target="$(readlink "$_gs_script")"
+  if [[ "$_gs_target" == /* ]]; then
+    _gs_script="$_gs_target"
+  else
+    _gs_script="$_gs_dir/$_gs_target"
+  fi
+done
+TOOL_ROOT="$(cd "$(dirname "$_gs_script")/.." && pwd)"
+unset _gs_script _gs_dir _gs_target
 COMMAND="${1:-}"
 shift || true
 
@@ -29,6 +41,9 @@ if [[ -n "$COMMAND" && -f "$TOOL_ROOT/commands/$COMMAND.sh" ]]; then
 fi
 
 case "$COMMAND" in
+  --version|-V)
+    exec "$TOOL_ROOT/commands/version.sh"
+    ;;
   help|-h|--help|"")
     cat <<EOF
 git-shadow
@@ -36,7 +51,8 @@ git-shadow
 Shadow branch pattern utilities.
 
 Commands:
-  install-hook
+  version
+  install-hooks
   doctor
   feature start <branch>
   feature publish [--commit] [-m MESSAGE]

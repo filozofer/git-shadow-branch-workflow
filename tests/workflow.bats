@@ -6,12 +6,12 @@ setup() {
   git init -q
   git config user.name "Test User"
   git config user.email "test@example.com"
-  git symbolic-ref HEAD refs/heads/develop
+  git symbolic-ref HEAD refs/heads/main
   echo "initial" > file.txt
   git add file.txt
   git commit -qm "initial"
-  git checkout -q -b "develop@local"
-  git checkout -q develop
+  git checkout -q -b "main@local"
+  git checkout -q main
 }
 
 teardown() {
@@ -39,8 +39,8 @@ teardown() {
   result="$(git log --oneline)"
   [[ "$result" == *"feat: public code"* ]]
 
-  # 5. Simulate merge into develop
-  git checkout -q develop
+  # 5. Simulate merge into main
+  git checkout -q main
   git merge -q --no-edit workflow-feature
 
   # 6. Finish feature
@@ -54,8 +54,8 @@ teardown() {
   run git branch --list "workflow-feature@local"
   [ -z "$output" ]
 
-  # 8. develop@local contains the feature commit
-  git checkout -q "develop@local"
+  # 8. main@local contains the feature commit
+  git checkout -q "main@local"
   result="$(git log --oneline)"
   [[ "$result" == *"feat: public code"* ]]
 }

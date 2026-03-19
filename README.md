@@ -84,11 +84,45 @@ The toolkit:
 
 # Installation
 
-## 1 Clone the toolkit
+## 1 Install git-shadow
+
+### curl (Linux / macOS / WSL — recommended)
 
 ```bash
-git clone https://github.com/filozofer/git-local-comments-workflow.git
+curl -fsSL https://raw.githubusercontent.com/filozofer/git-shadow/main/install.sh | bash
 ```
+
+Clones the toolkit to `~/.local/share/git-shadow` and links the binary to `~/.local/bin`.
+If `~/.local/bin` is not in your `PATH`, the installer prints the line to add to your shell profile.
+
+> Install a specific version: `GIT_SHADOW_VERSION=0.1.0 curl -fsSL ... | bash`
+
+### Homebrew (macOS / Linux)
+
+```bash
+brew tap filozofer/tap
+brew install git-shadow
+```
+
+> Requires the [filozofer/homebrew-tap](https://github.com/filozofer/homebrew-tap) tap to be published.
+
+### npm
+
+```bash
+npm install -g git-shadow-cli
+```
+
+> Requires Node ≥ 14. Sets up the `git-shadow` binary via npm's global bin directory.
+
+<details>
+<summary>Manual installation</summary>
+
+```bash
+git clone https://github.com/filozofer/git-shadow.git ~/.local/share/git-shadow
+ln -s ~/.local/share/git-shadow/bin/git-shadow ~/.local/bin/git-shadow
+```
+
+</details>
 
 ---
 
@@ -102,42 +136,30 @@ Configuration is loaded from three levels, in order of priority:
 | User | `~/.config/git-shadow/config.env` | global for current user |
 | Defaults | `config/defaults.env` (shipped) | built-in fallback |
 
-Example `.git-shadow.env` or `~/.config/git-shadow/config.env`:
+The `git shadow config` command lets you inspect and manage configuration directly from the CLI:
 
 ```bash
-WORKSPACE_DIR="../"
+git shadow config show                              # effective config with source tier
+git shadow config get LOCAL_SUFFIX                  # single key value
+git shadow config set PUBLIC_BASE_BRANCH=develop --project-config
+git shadow config list                              # all available keys
+```
+
+Or edit the files manually. Example `.git-shadow.env`:
+
+```bash
 PUBLIC_BASE_BRANCH="develop"
 LOCAL_SUFFIX="@local"
-LOCAL_COMMENT_PATTERN='^[[:space:]]*(///|##|---|;;|%%|<!---|/\*\*|\*)'
 ```
 
-> See `config/defaults.env` for all available variables.
+> Run `git shadow config list` to see all available keys and their defaults.
 
 ---
 
-## 3 Make `git shadow` available
-
-Option 1 (recommended): add the toolkit `bin` folder to your PATH, then use the wrapper directly:
+## 3 Install the pre-commit hook
 
 ```bash
-export PATH="$PWD/bin:$PATH"
-# now you can run:
-# git shadow commit -m "message"
-# git shadow feature publish
-```
-
-Option 2: create a Git alias :
-
-```bash
-git config --global alias.shadow "!sh /chemin/vers/git-shadow/bin/git-shadow"
-```
-
----
-
-## 4 Install the pre-commit hook
-
-```bash
-git shadow install-hook
+git shadow install-hooks
 ```
 
 The hook prevents accidental commits containing your local comment pattern (by default one extra comment marker, see LOCAL_COMMENT_PATTERN env var).

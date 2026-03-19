@@ -6,12 +6,12 @@ setup() {
   git init -q
   git config user.name "Test User"
   git config user.email "test@example.com"
-  git symbolic-ref HEAD refs/heads/develop
+  git symbolic-ref HEAD refs/heads/main
   echo "initial" > file.txt
   git add file.txt
   git commit -qm "initial"
-  git checkout -q -b "develop@local"
-  git checkout -q develop
+  git checkout -q -b "main@local"
+  git checkout -q main
 
   # Create feature, add code, publish
   git shadow feature start test-feature
@@ -19,8 +19,8 @@ setup() {
   git add feature.txt
   git shadow commit -m "feat: feature code"
   git shadow feature publish
-  # Simulate the feature being merged into develop
-  git checkout -q develop
+  # Simulate the feature being merged into main
+  git checkout -q main
   git merge -q --no-edit test-feature
 
   # Return to the local feature branch so feature finish can detect it
@@ -41,9 +41,9 @@ teardown() {
   [[ "$output" == *"Feature finished successfully"* ]]
 }
 
-@test "feature finish merges feature commits into develop@local" {
+@test "feature finish merges feature commits into main@local" {
   git shadow feature finish --no-pull
-  git checkout -q "develop@local"
+  git checkout -q "main@local"
   result="$(git log --oneline)"
   [[ "$result" == *"feat: feature code"* ]]
 }
@@ -61,7 +61,7 @@ teardown() {
 }
 
 @test "feature finish exits 1 when run from the base branch" {
-  git checkout -q develop
+  git checkout -q main
   run git shadow feature finish --no-pull
   [ "$status" -eq 1 ]
 }

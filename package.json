@@ -1,0 +1,30 @@
+{
+  "name": "git-shadow-cli",
+  "version": "1.0.0",
+  "description": "Shadow branch pattern utilities for Git — keep local thinking artifacts without polluting the shared repository.",
+  "homepage": "https://github.com/filozofer/git-shadow",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/filozofer/git-shadow.git"
+  },
+  "license": "MIT",
+  "bin": {
+    "git-shadow": "./bin/git-shadow"
+  },
+  "files": [
+    "bin/",
+    "commands/",
+    "config/",
+    "lib/",
+    "scripts/",
+    "VERSION"
+  ],
+  "scripts": {
+    "postinstall": "node -e \"var e=require('child_process').execSync,o={cwd:__dirname,stdio:'ignore'};e('chmod +x bin/git-shadow',o);e('find commands lib scripts -name \\\"*.sh\\\" -exec chmod +x {} \\\\;',o);\""
+  },
+  "os": ["linux", "darwin"],
+  "engines": {
+    "node": ">=14"
+  },
+  "keywords": ["git", "shadow", "branch", "workflow", "comments", "local"]
+}
