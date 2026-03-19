@@ -43,12 +43,21 @@ Commands:
   feature finish [--keep-branches] [--no-pull] [--force]
   commit [-m "message"]
   check-local-comments
+  config list [--json]
+  config show [--json]
+  config get <KEY> [--json]
+  config set <KEY>=<VALUE>|<KEY> <VALUE> [--project-config|--user-config]
+  config unset <KEY> [--project-config|--user-config]
 
 Examples:
   git shadow feature start feature/login
   git shadow commit -m "feat(auth): login route"
   git shadow feature publish --commit -m "feat: login"
   git shadow feature finish
+  git shadow config show
+  git shadow config get LOCAL_SUFFIX
+  git shadow config set LOCAL_SUFFIX=@mine --project-config
+  git shadow config unset LOCAL_SUFFIX --project-config
 EOF
     ;;
   *)

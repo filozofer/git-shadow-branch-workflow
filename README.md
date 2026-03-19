@@ -92,22 +92,26 @@ git clone https://github.com/filozofer/git-local-comments-workflow.git
 
 ---
 
-## 2 Configure environment if you want to
+## 2 Configure (optional)
+
+Configuration is loaded from three levels, in order of priority:
+
+| Level | Path | Scope |
+|-------|------|-------|
+| Project | `.git-shadow.env` in the repo root | per-repository |
+| User | `~/.config/git-shadow/config.env` | global for current user |
+| Defaults | `config/defaults.env` (shipped) | built-in fallback |
+
+Example `.git-shadow.env` or `~/.config/git-shadow/config.env`:
 
 ```bash
-cp .env.example .env
-```
-
-You can adapt to your needs.
-Example configuration:
-
-```
 WORKSPACE_DIR="../"
 PUBLIC_BASE_BRANCH="develop"
 LOCAL_SUFFIX="@local"
 LOCAL_COMMENT_PATTERN='^[[:space:]]*(///|##|---|;;|%%|<!---|/\*\*|\*)'
-
 ```
+
+> See `config/defaults.env` for all available variables.
 
 ---
 

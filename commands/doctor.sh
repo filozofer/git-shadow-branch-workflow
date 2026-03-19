@@ -28,21 +28,21 @@ done
 
 echo "✅ Toolkit files present"
 
-# 2) .env config
-if [[ ! -f "$TOOLKIT_ROOT/.env.example" ]]; then
-  echo "❌ .env.example missing" >&2
+# 2) built-in config defaults
+if [[ ! -f "$TOOLKIT_ROOT/config/defaults.env" ]]; then
+  echo "❌ config/defaults.env missing" >&2
   exit 1
 fi
-if ! grep -q '^LOCAL_COMMENT_PATTERN=' "$TOOLKIT_ROOT/.env.example"; then
-  echo "❌ LOCAL_COMMENT_PATTERN not set in .env.example" >&2
+if ! grep -q '^LOCAL_COMMENT_PATTERN=' "$TOOLKIT_ROOT/config/defaults.env"; then
+  echo "❌ LOCAL_COMMENT_PATTERN not set in config/defaults.env" >&2
   exit 1
 fi
-if ! grep -q '^SHADOW_COMMIT_PREFIX=' "$TOOLKIT_ROOT/.env.example"; then
-  echo "❌ SHADOW_COMMIT_PREFIX not set in .env.example" >&2
+if ! grep -q '^SHADOW_COMMIT_PREFIX=' "$TOOLKIT_ROOT/config/defaults.env"; then
+  echo "❌ SHADOW_COMMIT_PREFIX not set in config/defaults.env" >&2
   exit 1
 fi
-if ! grep -q '^SHADOW_COMMIT_FILTER=' "$TOOLKIT_ROOT/.env.example"; then
-  echo "❌ SHADOW_COMMIT_FILTER not set in .env.example" >&2
+if ! grep -q '^SHADOW_COMMIT_FILTER=' "$TOOLKIT_ROOT/config/defaults.env"; then
+  echo "❌ SHADOW_COMMIT_FILTER not set in config/defaults.env" >&2
   exit 1
 fi
 

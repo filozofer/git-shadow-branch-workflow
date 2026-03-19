@@ -6,7 +6,7 @@ set -euo pipefail
 # Purpose: shared utilities for paths and Git repository sanity checks.
 # -------------------------------------------------------------------
 
-# Load environment config from .env.example / .env
+# Load environment config (three-tier: defaults / user / project)
 # shellcheck disable=SC1091
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/env.sh"
 load_env
