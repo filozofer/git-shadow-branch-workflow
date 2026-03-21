@@ -55,9 +55,9 @@ SOURCE_BRANCH="$CURRENT_BRANCH"
 # If requested, commit any remaining changes in the local branch before publishing
 if [[ "$COMMIT_FIRST" -eq 1 ]]; then
   if [[ -n "$COMMIT_MESSAGE" ]]; then
-    "$TOOLKIT_ROOT/scripts/commit-with-separate-local-comments.sh" "$PWD" -m "$COMMIT_MESSAGE"
+    "$TOOLKIT_ROOT/scripts/commit-with-separate-local-comments.sh" -m "$COMMIT_MESSAGE"
   else
-    "$TOOLKIT_ROOT/scripts/commit-with-separate-local-comments.sh" "$PWD"
+    "$TOOLKIT_ROOT/scripts/commit-with-separate-local-comments.sh"
   fi
 fi
 

@@ -54,7 +54,8 @@ Commands:
   version
   install-hooks
   doctor
-  status
+  status [--json]
+  completion install
   feature start <branch>
   feature publish [--commit] [-m MESSAGE]
   feature finish [--keep-branches] [--no-pull] [--force]

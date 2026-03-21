@@ -111,3 +111,10 @@ else
   printf '    source ~/.bashrc   # or source ~/.zshrc\n\n'
   printf '  Then run: git shadow help\n\n'
 fi
+
+# ---------------------------------------------------------------------------
+# Shell completion
+# ---------------------------------------------------------------------------
+
+printf '🔧 Installing shell completion...\n'
+"$INSTALL_DIR/commands/completion/install.sh" || _warn "Shell completion setup failed. Run 'git shadow completion install' manually."
