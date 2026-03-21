@@ -3,7 +3,9 @@ set -euo pipefail
 
 # -------------------------------------------------------------------
 # Script: feature/finish.sh
-# Purpose: finalize work on a feature by syncing and cleaning branches.
+# Purpose: finalize a feature by validating public integration,
+# updating local base branches, merging local feature work back
+# into the local base, and optionally deleting feature branches.
 # -------------------------------------------------------------------
 
 # shellcheck disable=SC1091
@@ -60,7 +62,7 @@ for branch in "$feature_public_branch" "$feature_local_branch" "$public_base" "$
 done
 
 # Display summary of detected branches and bases for user confirmation
-echo "🏁 Feature completion detected"
+echo "🏁 Finalizing feature branches"
 echo "   Public branch : $feature_public_branch"
 echo "   Local branch  : $feature_local_branch"
 echo "   Public base   : $public_base"
@@ -94,7 +96,9 @@ echo "🔀 Checkout $local_base"
 git checkout "$local_base"
 if [[ "$PULL_BASES" -eq 1 ]]; then
   echo "⬇️  Pulling latest changes for $local_base"
-  git pull || true
+  if ! git pull; then
+    echo "⚠️  Failed to pull '$local_base'. Continuing with local state."
+  fi
 fi
 
 # Merge public base into local base to minimize risk of conflicts in final merge
