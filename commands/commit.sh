@@ -25,7 +25,7 @@ done
 
 shift $((OPTIND -1))
 if [[ $# -gt 0 ]]; then
-  echo "❌ Unknown argument(s): $*" >&2
+  ui_error "Unknown argument(s): $*"
   echo "Usage: $0 [-m \"message\"]" >&2
   exit 1
 fi
@@ -35,7 +35,7 @@ enter_project "."
 
 # Verify there is something to commit
 if git diff --cached --quiet; then
-  echo "❌ No staged changes." >&2
+  ui_error "No staged changes."
   exit 1
 fi
 
@@ -44,9 +44,9 @@ fi
 
 # If no code remains after stripping comments, abort commit
 if git diff --cached --quiet; then
-  echo "❌ After removing local comments, nothing remains to commit." >&2
-  echo "You can commit your local comments with: " >&2
-  echo "git commit -m \"$SHADOW_COMMIT_PREFIX title\" --no-verify"
+  ui_error "After removing local comments, nothing remains to commit."
+  ui_step "You can commit your local comments with:"
+  ui_step "git commit -m \"$SHADOW_COMMIT_PREFIX title\" --no-verify"
   exit 1
 fi
 
@@ -64,9 +64,10 @@ last_commit_message="$(git log -1 --pretty=%s)"
 git add .
 
 if git diff --cached --quiet; then
-  echo "ℹ️ No local comments to save in a separate commit."
+  ui_info "No local comments to save in a separate commit."
   exit 0
 fi
 
-# Commit local comments in a separate commit
+# Commit local comments in a separate shadow commit
+ui_shadow "Local comments found — saving shadow commit"
 git commit -m "$SHADOW_COMMIT_PREFIX $last_commit_message" --no-verify

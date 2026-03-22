@@ -7,6 +7,8 @@ set -euo pipefail
 # -------------------------------------------------------------------
 
 TOOLKIT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck disable=SC1091
+source "$TOOLKIT_ROOT/lib/common.sh"
 
 COMPLETION_MARKER="# git-shadow completion"
 
@@ -30,7 +32,7 @@ case "$SHELL_NAME" in
     FISH_COMPLETIONS_DIR="${HOME}/.config/fish/completions"
     ;;
   *)
-    echo "⚠️  Could not detect shell from \$SHELL='${SHELL:-}'."
+    ui_warn "Could not detect shell from \$SHELL='${SHELL:-}'."
     printf '\n  Manually source the appropriate completion script:\n'
     printf '    Bash: source %s/completions/git-shadow.bash\n' "$TOOLKIT_ROOT"
     printf '    Zsh:  source %s/completions/git-shadow.zsh\n'  "$TOOLKIT_ROOT"
@@ -44,7 +46,7 @@ esac
 # ---------------------------------------------------------------------------
 
 if [[ ! -f "$COMPLETION_SCRIPT" ]]; then
-  echo "❌ Completion script not found: $COMPLETION_SCRIPT" >&2
+  ui_error "Completion script not found: $COMPLETION_SCRIPT"
   exit 1
 fi
 
@@ -57,26 +59,26 @@ if [[ "$SHELL_NAME" == "fish" ]]; then
   FISH_COMPLETION_DEST="$FISH_COMPLETIONS_DIR/git-shadow.fish"
 
   if [[ -L "$FISH_COMPLETION_DEST" && "$(readlink "$FISH_COMPLETION_DEST")" == "$COMPLETION_SCRIPT" ]]; then
-    echo "ℹ️  Shell completion already installed in: $FISH_COMPLETION_DEST"
+    ui_info "Shell completion already installed in: $FISH_COMPLETION_DEST"
     exit 0
   fi
 
   mkdir -p "$FISH_COMPLETIONS_DIR"
   if ln -sf "$COMPLETION_SCRIPT" "$FISH_COMPLETION_DEST" 2>/dev/null; then
-    echo "✅ Shell completion installed for fish: $FISH_COMPLETION_DEST"
+    ui_ok "Shell completion installed for fish: $FISH_COMPLETION_DEST"
   else
     cp "$COMPLETION_SCRIPT" "$FISH_COMPLETION_DEST"
-    echo "✅ Shell completion installed for fish (copied): $FISH_COMPLETION_DEST"
+    ui_ok "Shell completion installed for fish (copied): $FISH_COMPLETION_DEST"
   fi
   exit 0
 fi
 
 if [[ -f "$SHELL_RC" ]] && grep -Fq "$COMPLETION_MARKER" "$SHELL_RC"; then
-  echo "ℹ️  Shell completion already installed in: $SHELL_RC"
+  ui_info "Shell completion already installed in: $SHELL_RC"
   exit 0
 fi
 
 printf '\n%s\nsource "%s"\n' "$COMPLETION_MARKER" "$COMPLETION_SCRIPT" >> "$SHELL_RC"
 
-echo "✅ Shell completion installed for $SHELL_NAME in: $SHELL_RC"
-printf '   Reload your shell or run: source %s\n' "$SHELL_RC"
+ui_ok "Shell completion installed for $SHELL_NAME in: $SHELL_RC"
+ui_step "Reload your shell or run: source $SHELL_RC"

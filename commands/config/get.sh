@@ -11,6 +11,8 @@ LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../lib" && pwd)"
 source "$LIB_DIR/config-utils.sh"
 # shellcheck disable=SC1091
 source "$LIB_DIR/env.sh"
+# shellcheck disable=SC1091
+source "$LIB_DIR/ui.sh"
 load_env
 
 JSON=false
@@ -28,7 +30,7 @@ if [[ -z "$KEY" ]]; then
 fi
 
 if ! config_is_known_key "$KEY"; then
-  printf '❌ Unknown configuration key: %s\n' "$KEY" >&2
+  ui_error "Unknown configuration key: $KEY"
   exit 1
 fi
 

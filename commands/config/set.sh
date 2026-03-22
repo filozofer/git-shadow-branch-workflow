@@ -7,8 +7,11 @@ set -euo pipefail
 # Purpose: write a configuration value to a project or user config file.
 # -------------------------------------------------------------------
 
+LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../lib" && pwd)"
 # shellcheck disable=SC1091
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../../lib" && pwd)/config-utils.sh"
+source "$LIB_DIR/config-utils.sh"
+# shellcheck disable=SC1091
+source "$LIB_DIR/ui.sh"
 
 SCOPE=""
 KEY=""
@@ -68,7 +71,7 @@ fi
 
 # Warn but don't block unknown keys (forward-compat).
 if ! config_is_known_key "$KEY"; then
-  printf '⚠️  Unknown git-shadow config key: %s (writing anyway)\n' "$KEY" >&2
+  ui_warn "Unknown git-shadow config key: $KEY (writing anyway)"
 fi
 
 # --- Interactive scope selector (if no scope flag given) ---
@@ -78,4 +81,4 @@ fi
 
 FILE="$(config_file_for_scope "$SCOPE")"
 config_set_in_file "$FILE" "$KEY" "$VALUE"
-printf '✅ %s="%s" written to %s config (%s)\n' "$KEY" "$VALUE" "$SCOPE" "$FILE"
+ui_ok "$KEY=\"$VALUE\" written to $SCOPE config ($FILE)"

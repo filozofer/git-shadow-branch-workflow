@@ -69,13 +69,13 @@ while IFS= read -r -d '' file; do
 
   # Clean up temporary file and mark that we made changes to the index
   rm -f "$tmp_file"
-  echo "Local comments removed from index: $file"
+  ui_shadow "Local comments removed from index: $file"
   has_changes=1
 done < <(git diff --cached --name-only -z --diff-filter=ACM)
 
 # Inform the user
 if [[ "$has_changes" -eq 0 ]]; then
-  echo "No local comments found in staged files."
+  ui_info "No local comments found in staged files."
 else
-  echo "Index cleanup complete. Working tree was left untouched."
+  ui_ok "Index cleanup complete. Working tree was left untouched."
 fi

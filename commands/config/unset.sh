@@ -6,8 +6,11 @@ set -euo pipefail
 # Purpose: remove a key from a project or user config file.
 # -------------------------------------------------------------------
 
+LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../lib" && pwd)"
 # shellcheck disable=SC1091
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../../lib" && pwd)/config-utils.sh"
+source "$LIB_DIR/config-utils.sh"
+# shellcheck disable=SC1091
+source "$LIB_DIR/ui.sh"
 
 SCOPE=""
 KEY=""
@@ -29,7 +32,7 @@ fi
 
 # Warn but don't block unknown keys (the user may want to clean up a stale entry).
 if ! config_is_known_key "$KEY"; then
-  printf '⚠️  Unknown git-shadow config key: %s\n' "$KEY" >&2
+  ui_warn "Unknown git-shadow config key: $KEY"
 fi
 
 # --- Interactive scope selector (if no scope flag given) ---
@@ -40,14 +43,14 @@ fi
 FILE="$(config_file_for_scope "$SCOPE")"
 
 if [[ ! -f "$FILE" ]]; then
-  printf 'ℹ️  Config file does not exist, nothing to unset: %s\n' "$FILE"
+  ui_info "Config file does not exist, nothing to unset: $FILE"
   exit 0
 fi
 
 if ! config_value_in_file "$FILE" "$KEY" >/dev/null 2>&1; then
-  printf 'ℹ️  Key "%s" is not set in %s config.\n' "$KEY" "$SCOPE"
+  ui_info "Key \"$KEY\" is not set in $SCOPE config."
   exit 0
 fi
 
 config_unset_in_file "$FILE" "$KEY"
-printf '✅ %s removed from %s config (%s)\n' "$KEY" "$SCOPE" "$FILE"
+ui_ok "$KEY removed from $SCOPE config ($FILE)"

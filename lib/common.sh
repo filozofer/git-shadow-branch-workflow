@@ -11,6 +11,10 @@ set -euo pipefail
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/env.sh"
 load_env
 
+# Load semantic UI helpers (colors, output functions)
+# shellcheck disable=SC1091
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/ui.sh"
+
 # Resolve absolute paths
 abs_path() {
   local path="$1"

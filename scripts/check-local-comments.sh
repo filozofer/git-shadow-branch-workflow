@@ -43,11 +43,11 @@ while IFS= read -r file; do
   # Search staged file content for lines matching LOCAL_COMMENT_PATTERN
   if git show ":$file" 2>/dev/null | grep -nE "$LOCAL_COMMENT_PATTERN" >/dev/null 2>&1; then
     if [[ "$has_local_comments" -eq 0 ]]; then
-      echo "❌ Commit blocked: local comments are still present in staged files."
+      ui_error "Commit blocked: local comments are still present in staged files."
       echo
     fi
     has_local_comments=1
-    echo "File: $file"
+    ui_shadow "File: $file"
     git show ":$file" | grep -nE "$LOCAL_COMMENT_PATTERN" || true
     echo
   fi
@@ -55,7 +55,6 @@ done <<< "$staged_files"
 
 # Inform the user if local comments were found and reject the commit
 if [[ "$has_local_comments" -eq 1 ]]; then
-  echo "Run this first:"
-  echo "$TOOLKIT_ROOT/scripts/strip-local-comments.sh $PWD"
+  ui_step "Run this first: git shadow commit"
   exit 1
 fi

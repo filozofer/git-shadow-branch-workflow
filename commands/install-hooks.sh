@@ -22,7 +22,7 @@ pre_commit_file="$(detect_hook_file pre-commit)"
 mkdir -p "$(dirname "$pre_commit_file")"
 
 if [[ -f "$pre_commit_file" ]] && grep -Fq "$HOOK_CHECK_MARKER" "$pre_commit_file"; then
-  echo "ℹ️  pre-commit hook already installed in: $pre_commit_file"
+  ui_info "pre-commit hook already installed in: $pre_commit_file"
 else
   if [[ -f "$pre_commit_file" ]]; then
     {
@@ -55,7 +55,7 @@ HOOK
     chmod +x "$pre_commit_file"
   fi
 
-  echo "✅ pre-commit hook installed in: $pre_commit_file"
+  ui_ok "pre-commit hook installed in: $pre_commit_file"
 fi
 
 # ---------------------------------------------------------------------------
@@ -67,7 +67,7 @@ pre_push_file="$(detect_hook_file pre-push)"
 mkdir -p "$(dirname "$pre_push_file")"
 
 if [[ -f "$pre_push_file" ]] && grep -Fq "$PRE_PUSH_MARKER" "$pre_push_file"; then
-  echo "ℹ️  pre-push hook already installed in: $pre_push_file"
+  ui_info "pre-push hook already installed in: $pre_push_file"
 else
   if [[ -f "$pre_push_file" ]]; then
     {
@@ -100,5 +100,5 @@ HOOK
     chmod +x "$pre_push_file"
   fi
 
-  echo "✅ pre-push hook installed in: $pre_push_file"
+  ui_ok "pre-push hook installed in: $pre_push_file"
 fi

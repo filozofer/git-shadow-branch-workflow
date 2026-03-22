@@ -13,7 +13,7 @@ JSON=false
 for arg in "$@"; do
   case "$arg" in
     --json) JSON=true ;;
-    *) echo "❌ Unknown argument: $arg" >&2
+    *) ui_error "Unknown argument: $arg"
        echo "Usage: git shadow status [--json]" >&2
        exit 1 ;;
   esac
@@ -34,7 +34,7 @@ if [[ -z "$CURRENT_BRANCH" ]]; then
   if $JSON; then
     printf '{"error": "detached HEAD state", "current_branch": null}\n'
   else
-    echo "❌ Detached HEAD state — not on any branch." >&2
+    ui_error "Detached HEAD state — not on any branch."
   fi
   exit 1
 fi
@@ -60,8 +60,8 @@ if [[ $shadow_exists -eq 0 && $IS_SHADOW -eq 0 ]]; then
   if $JSON; then
     printf '{"error": "not a Git Shadow branch", "current_branch": "%s"}\n' "$(_json_escape "$CURRENT_BRANCH")"
   else
-    echo "Not a Git Shadow branch."
-    echo "Current branch \`$CURRENT_BRANCH\` is neither a shadow branch nor a public branch managed by Git Shadow."
+    ui_warn "Not a Git Shadow branch."
+    ui_step "Current branch \`$CURRENT_BRANCH\` is neither a shadow branch nor a public branch managed by Git Shadow."
   fi
   exit 1
 fi
@@ -136,17 +136,15 @@ if $JSON; then
 fi
 
 # --- Human output ---
-BRANCH_EMOJI="$( [[ $IS_SHADOW -eq 1 ]] && echo "🧠" || echo "🌿" )"
-
-echo "Git Shadow Status"
+ui_info "Git Shadow Status"
 echo ""
 
 if [[ $IS_SHADOW -eq 1 ]]; then
-  printf '%s Current branch : %s\n' "$BRANCH_EMOJI" "$SHADOW_BRANCH"
+  ui_shadow "Current branch : $SHADOW_BRANCH"
   printf '   Branch type    : shadow\n'
   printf '   Public branch  : %s\n'   "$PUBLIC_BRANCH"
 else
-  printf '%s Current branch : %s\n' "$BRANCH_EMOJI" "$PUBLIC_BRANCH"
+  ui_git "Current branch : $PUBLIC_BRANCH"
   printf '   Branch type    : public\n'
   printf '   Shadow branch  : %s\n'   "$SHADOW_BRANCH"
 fi
@@ -164,5 +162,10 @@ if [[ $shadow_exists -eq 1 && $public_exists -eq 1 ]]; then
 fi
 
 echo ""
-printf '%s Status    : %s\n' "$STATUS_EMOJI" "$STATUS_LABEL"
-printf '   Next step : %s\n' "$NEXT_STEP"
+case "$STATUS_EMOJI" in
+  "✅") ui_ok    "Status    : $STATUS_LABEL" ;;
+  "⚠️") ui_warn  "Status    : $STATUS_LABEL" ;;
+  "❌") ui_error "Status    : $STATUS_LABEL" ;;
+  *)    printf '%s Status    : %s\n' "$STATUS_EMOJI" "$STATUS_LABEL" ;;
+esac
+ui_step "Next step : $NEXT_STEP"
