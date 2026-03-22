@@ -60,6 +60,7 @@ Commands:
   feature publish [--commit] [-m MESSAGE]
   feature finish [--keep-branches] [--no-pull] [--force]
   commit [-m "message"]
+  promote <file>
   check-local-comments
   config list [--json]
   config show [--json]
@@ -72,6 +73,7 @@ Examples:
   git shadow commit -m "feat(auth): login route"
   git shadow feature publish --commit -m "feat: login"
   git shadow feature finish
+  git shadow promote src/notes.md
   git shadow config show
   git shadow config get LOCAL_SUFFIX
   git shadow config set LOCAL_SUFFIX=@mine --project-config
