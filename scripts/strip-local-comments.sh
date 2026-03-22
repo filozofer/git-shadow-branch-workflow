@@ -15,12 +15,14 @@ enter_project "${1:-.}"
 # Return 0 if the file matches any glob in LOCAL_COMMENT_EXCLUDE, 1 otherwise.
 _is_excluded() {
   local file="$1" pattern
+  set -f  # disable glob expansion so *.md stays a pattern, not a file list
   for pattern in $LOCAL_COMMENT_EXCLUDE; do
     # shellcheck disable=SC2254
     case "$file" in
-      $pattern) return 0 ;;
+      $pattern) set +f; return 0 ;;
     esac
   done
+  set +f
   return 1
 }
 

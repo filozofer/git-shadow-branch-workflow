@@ -71,6 +71,16 @@ teardown() {
   [ "$status" -eq 0 ]
 }
 
+@test "check-local-comments skips *.md even when other .md files exist (glob expansion bug)" {
+  # Regression: when multiple .md files exist, *.md in LOCAL_COMMENT_EXCLUDE must
+  # stay as a glob pattern, not expand to the list of actual filenames.
+  echo "other" > other.md
+  printf '/// local comment\ncontent\n' > docs.md
+  git add other.md docs.md
+  run git shadow check-local-comments
+  [ "$status" -eq 0 ]
+}
+
 @test "check-local-comments skips excluded file types (*.json by default)" {
   printf '{\n  "key": "## not a comment"\n}\n' > config.json
   git add config.json
