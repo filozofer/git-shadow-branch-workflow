@@ -82,6 +82,47 @@ This information:
 
 Crucially, these annotations never leak into the public branch.
 
+# A Practical Example
+
+Here's what this looks like on a real feature. The developer is building an authentication module with an AI assistant (Claude, Cursor, Copilot, etc.).
+
+On `feature/auth@local`, the file looks like this:
+
+```ts
+
+export async function login(email: string, password: string): Promise<Session> {
+  const user = await prisma.user.findUnique({ where: { email } })
+  if (!user) throw new AuthError('INVALID_CREDENTIALS')
+
+  const valid = await bcrypt.compare(password, user.passwordHash)
+  if (!valid) throw new AuthError('INVALID_CREDENTIALS')
+
+  return sessionStore.create({ userId: user.id, ttl: 30 * 24 * 3600 })
+}
+```
+
+On `feature/auth` (the published branch), the same file:
+
+```ts
+export async function login(email: string, password: string): Promise<Session> {
+  const user = await prisma.user.findUnique({ where: { email } })
+  if (!user) throw new AuthError('INVALID_CREDENTIALS')
+
+  const valid = await bcrypt.compare(password, user.passwordHash)
+  if (!valid) throw new AuthError('INVALID_CREDENTIALS')
+
+  return sessionStore.create({ userId: user.id, ttl: 30 * 24 * 3600 })
+}
+```
+
+The `@local` branch carries:
+
+- Architecture context the AI needs to not make incorrect assumptions
+- Decision notes explaining non-obvious choices (constant-time comparison, 30-day TTL)
+- Cross-references to issues and config files the AI should know about
+
+These annotations are committed as `[MEMORY]` commits or as the comment layer of regular commits. When you open the file with your AI tool, the context is already there — you don't re-explain the session store, the error convention, or the known constraints. The AI picks them up from the file.
+
 # Versioned AI Memory
 
 One of the most powerful properties of Git Shadow is versioned cognition.
