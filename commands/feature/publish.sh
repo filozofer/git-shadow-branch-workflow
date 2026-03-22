@@ -104,8 +104,87 @@ for sha in "${commits_to_pick[@]}"; do
   git log -1 --pretty=' - %h %s' "$sha"
 done
 
-# Cherry-pick each commit
+# ---------------------------------------------------------------------------
+# PRE-FLIGHT: detect files modified but missing on the target branch
+# ---------------------------------------------------------------------------
+
+# Collect files that will be promoted in this batch
+_promoted_files=""
 for sha in "${commits_to_pick[@]}"; do
+  subject="$(git log -1 --pretty=%s "$sha")"
+  if [[ "$subject" =~ ^"shadow: promote " ]]; then
+    promo_path="$(git log -1 --pretty=%B "$sha" | grep '^path=' | head -1 | cut -d= -f2-)"
+    [[ -n "$promo_path" ]] && _promoted_files="$_promoted_files $promo_path "
+  fi
+done
+
+# Check each regular commit: modified files must exist on the target branch
+_preflight_ok=1
+_missing_files=()
+for sha in "${commits_to_pick[@]}"; do
+  subject="$(git log -1 --pretty=%s "$sha")"
+  [[ "$subject" =~ ^"shadow: promote " ]] && continue
+  while IFS= read -r changed_file; do
+    [[ -z "$changed_file" ]] && continue
+    if ! git cat-file -e "HEAD:$changed_file" 2>/dev/null; then
+      if [[ " $_promoted_files " != *" $changed_file "* ]]; then
+        _missing_files+=("$changed_file")
+        _preflight_ok=0
+      fi
+    fi
+  done < <(git diff-tree --no-commit-id -r --name-only --diff-filter=M "$sha" 2>/dev/null)
+done
+
+if [[ "$_preflight_ok" -eq 0 ]]; then
+  if [[ "${#_missing_files[@]}" -eq 1 ]]; then
+    ui_error "Cannot publish changes to '${_missing_files[0]}' — file does not exist on '$TARGET_BRANCH' yet."
+    ui_step "Run first: git shadow promote ${_missing_files[0]}"
+  else
+    ui_error "Cannot publish — some modified files do not exist on '$TARGET_BRANCH' yet:"
+    for _f in "${_missing_files[@]}"; do
+      ui_step "  - $_f"
+    done
+    ui_step "Promote them first: git shadow promote ${_missing_files[*]}"
+  fi
+  git checkout "$SOURCE_BRANCH"
+  exit 1
+fi
+
+# ---------------------------------------------------------------------------
+# Cherry-pick each commit (or publish promoted files)
+# ---------------------------------------------------------------------------
+
+for sha in "${commits_to_pick[@]}"; do
+  subject="$(git log -1 --pretty=%s "$sha")"
+
+  # --- Handle promote commits: write file from blob, then commit ---
+  if [[ "$subject" =~ ^"shadow: promote " ]]; then
+    commit_body="$(git log -1 --pretty=%B "$sha")"
+    promo_path="$(printf '%s\n' "$commit_body" | grep '^path=' | head -1 | cut -d= -f2-)"
+    promo_blob="$(printf '%s\n' "$commit_body" | grep '^blob=' | head -1 | cut -d= -f2-)"
+    if [[ -z "$promo_path" || -z "$promo_blob" ]]; then
+      ui_error "Malformed promote commit $sha: missing path= or blob= in body."
+      exit 1
+    fi
+    if ! git cat-file -t "$promo_blob" >/dev/null 2>&1; then
+      ui_error "Blob object not found in repository: $promo_blob"
+      exit 1
+    fi
+    ui_shadow "Publishing promoted file: $promo_path"
+    promo_dir="$(dirname "$promo_path")"
+    [[ "$promo_dir" != "." ]] && mkdir -p "$promo_dir"
+    git cat-file -p "$promo_blob" > "$promo_path"
+    git add "$promo_path"
+    if git diff --cached --quiet; then
+      ui_skip "Promote skipped: $promo_path already present on '$TARGET_BRANCH' with identical content."
+      continue
+    fi
+    git commit -m "shadow: publish $promo_path"
+    ui_ok "Promoted file published: $promo_path"
+    continue
+  fi
+
+  # --- Regular cherry-pick ---
   ui_git "Cherry-picking $sha"
 
   if git cherry-pick "$sha"; then

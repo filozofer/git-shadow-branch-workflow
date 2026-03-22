@@ -23,7 +23,7 @@ _git_shadow() {
 
   # Complete top-level command
   if [[ $pos -le 0 ]]; then
-    COMPREPLY=($(compgen -W "version install-hooks doctor status commit check-local-comments feature config completion" -- "$cur"))
+    COMPREPLY=($(compgen -W "version install-hooks doctor status commit promote check-local-comments feature config completion" -- "$cur"))
     return
   fi
 
@@ -62,6 +62,12 @@ _git_shadow() {
       ;;
     commit)
       COMPREPLY=($(compgen -W "-m" -- "$cur"))
+      ;;
+    promote)
+      # Complete with files tracked in the current shadow branch
+      local tracked_files
+      tracked_files="$(git ls-files 2>/dev/null)"
+      COMPREPLY=($(compgen -W "$tracked_files" -- "$cur"))
       ;;
     completion)
       if [[ $pos -eq 1 ]]; then
