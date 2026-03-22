@@ -36,5 +36,6 @@ EOF
 
 git add auth.ts
 
-# Clean, minimal prompt for the recording
+# Clean, minimal prompt + blank line before each prompt for readability
+export PROMPT_COMMAND='echo'
 export PS1='\[\033[0;32m\]❯\[\033[0m\] '
