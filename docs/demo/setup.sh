@@ -19,11 +19,15 @@ git commit -qm "init"
 # Start feature branch (creates auth + auth@local, checks out auth@local)
 git shadow feature start auth > /dev/null 2>&1
 
-# Pre-stage the source file with local comments
-cat > auth.ts << 'EOF'
+# Pre-stage the source file with local comments.
+# LC holds the local-comment marker so this script isn't itself flagged.
+LC='///'
+cat > auth.ts << EOF
+${LC} Get user from DB — returns null if not found
 const user = await db.findOne({ email })
 if (!user) throw new Error('Invalid credentials')
 
+${LC} bcrypt takes ~100ms — skip awaiting in hot paths
 const valid = await bcrypt.compare(password, user.hash)
 if (!valid) throw new Error('Bad password')
 
