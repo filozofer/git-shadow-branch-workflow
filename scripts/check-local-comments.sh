@@ -12,6 +12,18 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../lib" && pwd)/common.sh"
 # Navigate to project (default to current directory for hook usage)
 enter_project "${1:-.}"
 
+# Return 0 if the file matches any glob in LOCAL_COMMENT_EXCLUDE, 1 otherwise.
+_is_excluded() {
+  local file="$1" pattern
+  for pattern in $LOCAL_COMMENT_EXCLUDE; do
+    # shellcheck disable=SC2254
+    case "$file" in
+      $pattern) return 0 ;;
+    esac
+  done
+  return 1
+}
+
 # Get list of staged files and check for local comments
 staged_files="$(git diff --cached --name-only --diff-filter=ACM)"
 if [[ -z "$staged_files" ]]; then
@@ -20,6 +32,11 @@ fi
 has_local_comments=0
 while IFS= read -r file; do
   [[ -z "$file" ]] && continue
+
+  # Skip files matching LOCAL_COMMENT_EXCLUDE (e.g. *.md, *.json)
+  if _is_excluded "$(basename "$file")"; then
+    continue
+  fi
 
   # Search staged file content for lines matching LOCAL_COMMENT_PATTERN
   if git show ":$file" 2>/dev/null | grep -nE "$LOCAL_COMMENT_PATTERN" >/dev/null 2>&1; then

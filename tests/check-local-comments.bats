@@ -49,3 +49,64 @@ teardown() {
   [ "$status" -eq 1 ]
   [[ "$output" == *"myfile.txt"* ]]
 }
+
+@test "check-local-comments exits 1 when staged file contains triple-dash HTML comment" {
+  printf '<!--- local note --->\nnormal code\n' > file.txt
+  git add file.txt
+  run git shadow check-local-comments
+  [ "$status" -eq 1 ]
+}
+
+@test "check-local-comments exits 0 for regular HTML comment (<!-- not <!---)" {
+  printf '<!-- regular comment -->\nnormal code\n' > file.txt
+  git add file.txt
+  run git shadow check-local-comments
+  [ "$status" -eq 0 ]
+}
+
+@test "check-local-comments skips excluded file types (*.md by default)" {
+  printf '## This is a markdown H2 heading\ncontent\n' > README.md
+  git add README.md
+  run git shadow check-local-comments
+  [ "$status" -eq 0 ]
+}
+
+@test "check-local-comments skips excluded file types (*.json by default)" {
+  printf '{\n  "key": "## not a comment"\n}\n' > config.json
+  git add config.json
+  run git shadow check-local-comments
+  [ "$status" -eq 0 ]
+}
+
+@test "check-local-comments processes non-excluded file with ## marker" {
+  printf '## local note\nreal code\n' > script.sh
+  git add script.sh
+  run git shadow check-local-comments
+  [ "$status" -eq 1 ]
+}
+
+@test "check-local-comments respects custom LOCAL_COMMENT_EXCLUDE via project config" {
+  # Exclude .sh files from processing
+  printf 'LOCAL_COMMENT_EXCLUDE="*.sh"\n' > .git-shadow.env
+  printf '/// local comment\ncode\n' > script.sh
+  git add script.sh
+  run git shadow check-local-comments
+  [ "$status" -eq 0 ]
+}
+
+@test "check-local-comments respects custom LOCAL_COMMENT_PATTERN via project config" {
+  # Custom pattern: only ### is a local marker; default /// is no longer matched
+  printf 'LOCAL_COMMENT_PATTERN="^[[:space:]]*(###)"\n' > .git-shadow.env
+  printf '/// triple slash — not a local comment with custom pattern\ncode\n' > file.txt
+  git add file.txt
+  run git shadow check-local-comments
+  [ "$status" -eq 0 ]
+}
+
+@test "check-local-comments detects custom LOCAL_COMMENT_PATTERN marker" {
+  printf 'LOCAL_COMMENT_PATTERN="^[[:space:]]*(###)"\n' > .git-shadow.env
+  printf '### custom local comment\ncode\n' > file.txt
+  git add file.txt
+  run git shadow check-local-comments
+  [ "$status" -eq 1 ]
+}

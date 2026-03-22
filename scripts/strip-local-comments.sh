@@ -11,10 +11,28 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../lib" && pwd)/common.sh"
 
 # Navigate to project and get list of staged files (default to current directory)
 enter_project "${1:-.}"
+
+# Return 0 if the file matches any glob in LOCAL_COMMENT_EXCLUDE, 1 otherwise.
+_is_excluded() {
+  local file="$1" pattern
+  for pattern in $LOCAL_COMMENT_EXCLUDE; do
+    # shellcheck disable=SC2254
+    case "$file" in
+      $pattern) return 0 ;;
+    esac
+  done
+  return 1
+}
+
 has_changes=0
 while IFS= read -r -d '' file; do
   # Skip deleted files; only process added/copied/modified files
   if [[ ! -f "$file" ]]; then
+    continue
+  fi
+
+  # Skip files matching LOCAL_COMMENT_EXCLUDE (e.g. *.md, *.json)
+  if _is_excluded "$(basename "$file")"; then
     continue
   fi
 

@@ -62,3 +62,45 @@ teardown() {
   # Only 2 commits: initial + feat:plain (no MEMORY commit)
   [ "$commit_count" -eq 2 ]
 }
+
+@test "commit does not strip ## from excluded file types (*.md)" {
+  printf '## Section heading\ncontent\n' > README.md
+  git add README.md
+  git shadow commit -m "docs: readme"
+  # Public commit must still have the ## heading
+  result="$(git show HEAD:README.md)"
+  [[ "$result" == *"## Section heading"* ]]
+}
+
+@test "commit does not strip ## from excluded file types (*.yaml)" {
+  printf 'key: value\n## comment\n' > config.yaml
+  git add config.yaml
+  git shadow commit -m "chore: config"
+  result="$(git show HEAD:config.yaml)"
+  [[ "$result" == *"## comment"* ]]
+}
+
+@test "commit strips ## from non-excluded source files" {
+  printf '## local note\nreal_function()\n' > script.sh
+  git add script.sh
+  git shadow commit -m "chore: script"
+  # Public commit should not have the ## line
+  result="$(git show HEAD~1:script.sh 2>/dev/null || git show HEAD:script.sh)"
+  [[ "$result" != *"## local note"* ]]
+}
+
+@test "commit strips <!--- marker (triple-dash HTML comment)" {
+  printf '<!--- local note --->\nreal code\n' > file.html
+  git add file.html
+  git shadow commit -m "feat: html"
+  result="$(git show HEAD~1:file.html 2>/dev/null || git show HEAD:file.html)"
+  [[ "$result" != *"<!--- local note"* ]]
+}
+
+@test "commit does not strip regular <!-- HTML comment" {
+  printf '<!-- regular comment -->\nreal code\n' > file.html
+  git add file.html
+  git shadow commit -m "feat: html"
+  result="$(git show HEAD:file.html)"
+  [[ "$result" == *"<!-- regular comment -->"* ]]
+}
