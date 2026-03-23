@@ -53,13 +53,23 @@ while IFS= read -r -d '' file; do
 
   # Remove lines matching the local comment pattern while preserving other content.
   # grep -v exits 1 when all lines match (file is entirely local comments); || true prevents
-  # set -e from aborting — the resulting empty index entry is handled by the caller.
+  # set -e from aborting.
   git show ":$file" | grep -vE "$LOCAL_COMMENT_PATTERN" > "$tmp_file" || true
   index_info="$(git ls-files -s -- "$file")"
   if [[ -z "$index_info" ]]; then
     echo "Unable to read index info for $file" >&2
     rm -f "$tmp_file"
     exit 1
+  fi
+
+  # If the file is now empty and did not exist in HEAD (new file with only local comments),
+  # remove it from the index entirely so the caller sees no staged changes.
+  if [[ ! -s "$tmp_file" ]] && ! git cat-file -e "HEAD:$file" 2>/dev/null; then
+    git rm --cached --quiet -- "$file"
+    rm -f "$tmp_file"
+    ui_shadow "Local comments removed from index: $file"
+    has_changes=1
+    continue
   fi
 
   # Update the Git index with the cleaned file content, preserving mode and path
