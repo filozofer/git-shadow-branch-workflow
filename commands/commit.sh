@@ -39,15 +39,22 @@ if git diff --cached --quiet; then
   exit 1
 fi
 
+# Capture the list of staged files before stripping, so we can re-stage only those files later
+mapfile -d '' STAGED_FILES < <(git diff --cached --name-only -z --diff-filter=ACM)
+
 # Remove local comments from index while keeping working tree unmodified
 "$TOOLKIT_ROOT/scripts/strip-local-comments.sh"
 
-# If no code remains after stripping comments, abort commit
+# If no code remains after stripping comments, commit everything as a [MEMORY] commit
 if git diff --cached --quiet; then
-  ui_error "After removing local comments, nothing remains to commit."
-  ui_step "You can commit your local comments with:"
-  ui_step "git commit -m \"$SHADOW_COMMIT_PREFIX title\" --no-verify"
-  exit 1
+  ui_shadow "Only local comments staged — saving as a shadow commit"
+  git add -- "${STAGED_FILES[@]}"
+  if [[ -n "$COMMIT_MESSAGE" ]]; then
+    git commit -m "$SHADOW_COMMIT_PREFIX $COMMIT_MESSAGE" --no-verify
+  else
+    git commit -m "$SHADOW_COMMIT_PREFIX local comments" --no-verify
+  fi
+  exit 0
 fi
 
 # Create main commit (clean code)
@@ -60,8 +67,8 @@ fi
 # Remember last non-comment commit message for comments commit reference
 last_commit_message="$(git log -1 --pretty=%s)"
 
-# Stage changes again to capture local comments that remain
-git add .
+# Stage changes again to capture local comments that remain (only originally staged files)
+git add -- "${STAGED_FILES[@]}"
 
 if git diff --cached --quiet; then
   ui_info "No local comments to save in a separate commit."

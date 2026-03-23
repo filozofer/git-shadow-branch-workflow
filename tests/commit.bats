@@ -54,6 +54,18 @@ teardown() {
   [[ "$last_msg" == "[MEMORY]"* ]]
 }
 
+@test "commit creates a [MEMORY] commit automatically when only local comments are staged" {
+  printf '/// only a comment\n' > feature.txt
+  git add feature.txt
+  run git shadow commit -m "fix: comments only"
+  [ "$status" -eq 0 ]
+  last_msg="$(git log -1 --pretty=%s)"
+  [[ "$last_msg" == "[MEMORY] fix: comments only" ]]
+  # No separate public commit should have been created
+  commit_count="$(git log --oneline | wc -l)"
+  [ "$commit_count" -eq 2 ]
+}
+
 @test "commit does not create a [MEMORY] commit when no local comments" {
   echo "plain code without comments" > feature.txt
   git add feature.txt
