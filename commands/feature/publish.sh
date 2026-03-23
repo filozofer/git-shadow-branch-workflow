@@ -11,12 +11,17 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../../lib" && pwd)/common.sh"
 
 COMMIT_FIRST=0
 COMMIT_MESSAGE=""
+PUSH_AFTER=0
 
 # Parse options
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --commit)
       COMMIT_FIRST=1
+      shift
+      ;;
+    --push)
+      PUSH_AFTER=1
       shift
       ;;
     -m)
@@ -29,7 +34,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     *)
       ui_error "Unknown argument: $1"
-      echo "Usage: git shadow feature publish [--commit] [-m \"MESSAGE\"]" >&2
+      echo "Usage: git shadow feature publish [--commit] [--push] [-m \"MESSAGE\"]" >&2
       exit 1
       ;;
   esac
@@ -204,3 +209,12 @@ for sha in "${commits_to_pick[@]}"; do
 done
 
 ui_ok "Publish completed on branch: $TARGET_BRANCH"
+
+if [[ "$PUSH_AFTER" -eq 1 ]]; then
+  ui_git "Pushing $TARGET_BRANCH to origin..."
+  git push origin "$TARGET_BRANCH"
+  ui_ok "Pushed $TARGET_BRANCH to origin."
+fi
+
+git checkout "$SOURCE_BRANCH"
+ui_shadow "Switched back to shadow branch: $SOURCE_BRANCH"
