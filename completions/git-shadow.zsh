@@ -67,6 +67,12 @@ _git_shadow_feature() {
             '--no-pull[skip pulling base branches]' \
             '--force[force delete branches even if not fully merged]'
           ;;
+        sync)
+          _arguments \
+            '--merge[merge instead of rebase (for shared shadow branches)]' \
+            '--continue[resume after manual conflict resolution]' \
+            '--abort[abort the sync]'
+          ;;
       esac
       ;;
   esac

@@ -3,14 +3,23 @@ set -euo pipefail
 
 # -------------------------------------------------------------------
 # Script: feature/sync.sh
-# Purpose: rebase the current shadow branch onto its public counterpart.
-#   - Regular code commits: auto-resolved with --ours (public branch wins)
-#   - [MEMORY] commits: paused for manual resolution
+# Purpose: sync the current shadow branch with its public counterpart.
+#
+#   Default (rebase mode):
+#     Replays shadow commits on top of the public branch.
+#     - Regular code conflicts: auto-resolved in favour of public branch
+#     - [MEMORY] commit conflicts: paused for manual resolution
+#
+#   --merge mode:
+#     Merges the public branch into the shadow branch (preserves history).
+#     Intended for shared shadow branches pushed to a remote.
+#     All conflicts are auto-resolved in favour of the public branch
+#     via `git merge -X theirs`.
 #
 # Usage:
-#   git shadow feature sync             # start sync
-#   git shadow feature sync --continue  # resume after manual [MEMORY] conflict
-#   git shadow feature sync --abort     # abort the rebase
+#   git shadow feature sync [--merge]
+#   git shadow feature sync --continue
+#   git shadow feature sync --abort
 # -------------------------------------------------------------------
 
 # shellcheck disable=SC1091
@@ -18,14 +27,16 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../../lib" && pwd)/common.sh"
 
 CONTINUE=0
 ABORT=0
+MERGE_MODE=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --continue) CONTINUE=1; shift ;;
     --abort)    ABORT=1;    shift ;;
+    --merge)    MERGE_MODE=1; shift ;;
     *)
       ui_error "Unknown argument: $1"
-      echo "Usage: git shadow feature sync [--continue | --abort]" >&2
+      echo "Usage: git shadow feature sync [--merge] [--continue | --abort]" >&2
       exit 1
       ;;
   esac
@@ -34,29 +45,48 @@ done
 enter_project "."
 
 # ---------------------------------------------------------------------------
-# --abort
+# --abort: works for both rebase and merge in-progress
 # ---------------------------------------------------------------------------
 if [[ "$ABORT" -eq 1 ]]; then
-  git rebase --abort
-  ui_ok "Rebase aborted."
+  GIT_DIR="$(git rev-parse --git-dir)"
+  if [[ -d "$GIT_DIR/rebase-merge" ]]; then
+    git rebase --abort
+    ui_ok "Rebase aborted."
+  elif [[ -f "$GIT_DIR/MERGE_HEAD" ]]; then
+    git merge --abort
+    ui_ok "Merge aborted."
+  else
+    ui_error "No rebase or merge in progress. Nothing to abort."
+    exit 1
+  fi
   exit 0
 fi
 
 # ---------------------------------------------------------------------------
-# --continue: resume after a manual [MEMORY] conflict resolution
+# --continue: resume after a manual conflict resolution
 # ---------------------------------------------------------------------------
 if [[ "$CONTINUE" -eq 1 ]]; then
-  REBASE_DIR="$(git rev-parse --git-dir)/rebase-merge"
-  if [[ ! -d "$REBASE_DIR" ]]; then
-    ui_error "No rebase in progress. Nothing to continue."
+  GIT_DIR="$(git rev-parse --git-dir)"
+
+  if [[ -f "$GIT_DIR/MERGE_HEAD" ]]; then
+    # Merge in progress
+    ui_info "Resuming merge after manual resolution..."
+    GIT_EDITOR=true git merge --continue
+    ui_ok "Merge sync completed."
+    exit 0
+  fi
+
+  if [[ -d "$GIT_DIR/rebase-merge" ]]; then
+    # During rebase, HEAD is detached — read the branch name from rebase state
+    CURRENT_BRANCH="$(sed 's|refs/heads/||' "$GIT_DIR/rebase-merge/head-name")"
+    PUBLIC_BRANCH="$(public_branch_from_any "$CURRENT_BRANCH")"
+    ui_info "Resuming rebase after manual resolution..."
+    GIT_EDITOR=true git rebase --continue || true
+    # Fall through to the resolution loop below if more conflicts remain
+  else
+    ui_error "No rebase or merge in progress. Nothing to continue."
     exit 1
   fi
-  # During rebase, HEAD is detached — read the branch name from rebase state
-  CURRENT_BRANCH="$(sed 's|refs/heads/||' "$(git rev-parse --git-dir)/rebase-merge/head-name")"
-  PUBLIC_BRANCH="$(public_branch_from_any "$CURRENT_BRANCH")"
-  ui_info "Resuming sync after manual resolution..."
-  GIT_EDITOR=true git rebase --continue || true
-  # Fall through to the main loop below if more conflicts remain
 else
   # ---------------------------------------------------------------------------
   # Validate we are on a shadow branch
@@ -74,8 +104,26 @@ else
   PUBLIC_BRANCH="$(public_branch_from_any "$CURRENT_BRANCH")"
 fi
 
+# At this point PUBLIC_BRANCH is set (either from continue state or fresh start)
+: "${PUBLIC_BRANCH:?}"
+
 # ---------------------------------------------------------------------------
-# Start rebase (only if not already in progress)
+# --merge mode: single merge with auto-resolution in favour of public branch
+# ---------------------------------------------------------------------------
+if [[ "$MERGE_MODE" -eq 1 ]]; then
+  if ! git show-ref --verify --quiet "refs/heads/$PUBLIC_BRANCH"; then
+    ui_error "Public branch does not exist: $PUBLIC_BRANCH"
+    exit 1
+  fi
+  ensure_clean_repo
+  ui_shadow "Merging '$PUBLIC_BRANCH' into '$CURRENT_BRANCH' (--merge mode)..."
+  GIT_EDITOR=true git merge -X theirs "$PUBLIC_BRANCH"
+  ui_ok "Shadow branch '$CURRENT_BRANCH' is now in sync with '$PUBLIC_BRANCH'."
+  exit 0
+fi
+
+# ---------------------------------------------------------------------------
+# Rebase mode: start rebase (only if not already in progress)
 # ---------------------------------------------------------------------------
 REBASE_DIR="$(git rev-parse --git-dir)/rebase-merge"
 if [[ ! -d "$REBASE_DIR" ]]; then

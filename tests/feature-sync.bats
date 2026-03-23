@@ -62,7 +62,7 @@ teardown() {
   git checkout -q "feature/foo@local"
   run git shadow feature sync --continue
   [ "$status" -eq 1 ]
-  [[ "$output" == *"No rebase in progress"* ]]
+  [[ "$output" == *"No rebase or merge in progress"* ]]
 }
 
 # ---------------------------------------------------------------------------
@@ -141,4 +141,53 @@ teardown() {
   [[ "$output" == *"--continue"* ]]
   # Rebase should still be in progress
   [ -d "$(git rev-parse --git-dir)/rebase-merge" ]
+}
+
+# ---------------------------------------------------------------------------
+# --merge mode
+# ---------------------------------------------------------------------------
+
+@test "feature sync --merge succeeds and integrates public commits" {
+  git checkout -q "feature/foo@local"
+  run git shadow feature sync --merge
+  [ "$status" -eq 0 ]
+  # Public branch content should be present
+  [ "$(cat app.ts)" = "v2" ]
+  # [MEMORY] file should still be present
+  [ -f notes.md ]
+}
+
+@test "feature sync --merge preserves [MEMORY] files" {
+  git checkout -q "feature/foo@local"
+  git shadow feature sync --merge
+
+  # The [MEMORY] commit's file should be intact
+  run git log --oneline --all
+  [[ "$output" == *"[MEMORY] local notes"* ]]
+  [ -f notes.md ]
+  [ "$(cat notes.md)" = "/// local note" ]
+}
+
+@test "feature sync --abort aborts a merge in progress" {
+  # Force a merge conflict (without -X theirs) to get into a mid-merge state
+  git checkout -q "feature/foo@local"
+  echo "shadow content" > app.ts
+  git add app.ts
+  git commit -qm "shadow: local change"
+
+  # Add conflicting public change
+  git checkout -q feature/foo
+  echo "public content" > app.ts
+  git add app.ts
+  git commit -qm "feat: conflicting public change"
+
+  git checkout -q "feature/foo@local"
+  # Start a plain merge (no -X theirs) to force a conflict
+  git merge feature/foo || true
+  [ -f "$(git rev-parse --git-dir)/MERGE_HEAD" ]
+
+  run git shadow feature sync --abort
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"aborted"* ]]
+  [ ! -f "$(git rev-parse --git-dir)/MERGE_HEAD" ]
 }

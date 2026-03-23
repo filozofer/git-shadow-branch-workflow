@@ -58,7 +58,7 @@ Commands:
   completion install
   feature start [<branch>]
   feature publish [--commit] [-m MESSAGE] [--push]
-  feature sync [--continue | --abort]
+  feature sync [--merge] [--continue | --abort]
   feature finish [--keep-branches] [--no-pull] [--force]
   commit [-m "message"]
   promote <file>
